@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>GLOW GLAMOUR - Leader in the Cosmetics Industry</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="stylesheet" href="styles.css" />
+  <script src="https://cdn.jsdelivr.net/npm/pouchdb@8.0.1/dist/pouchdb.min.js"></script>
+</head>
+<body>
+  <header>
+    <h1>GLOW GLAMOUR</h1>
+    <p>Status: <span id="sync-status">not connected</span></p>
+  </header>
+
+  <section class="controls">
+    <form id="product-form">
+      <input type="hidden" name="_id" />
+      <label>
+        Brand
+        <input name="brand" required />
+      </label>
+      <label>
+        Product Name
+        <input name="product_name" required />
+      </label>
+      <label>
+        Category
+        <input name="category" required />
+      </label>
+      <label>
+        Price (USD)
+        <input name="price_usd" type="number" step="0.01" min="0" required />
+      </label>
+      <label>
+        Rating (0–5)
+        <input name="rating" type="number" step="0.1" min="0" max="5" required />
+      </label>
+      <div class="buttons">
+        <button type="submit" id="save-btn">Save</button>
+        <button type="button" id="reset-btn">Reset</button>
+      </div>
+    </form>
+  </section>
+
+  <footer>
+    <small>GLOW GLAMOUR Offline first application via PouchDB</small>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

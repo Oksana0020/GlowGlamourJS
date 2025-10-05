@@ -1,0 +1,99 @@
+* { box-sizing: border-box; }
+body { 
+  font: 16px/1.4 system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; 
+  margin: 2rem; 
+  background: linear-gradient(135deg, #1e3a8a, #3b82f6);
+  color: #f8fafc;
+  min-height: 100vh;
+}
+header h1 { 
+  margin: 0 0 .25rem; 
+  color: #ffffff;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+header p { 
+  margin: 0 0 1rem; 
+  color: #cbd5e1; 
+}
+label { 
+  display: block; 
+  margin: .5rem 0; 
+  color: #e2e8f0;
+  font-weight: 500;
+}
+input { 
+  width: 100%; 
+  padding: .5rem; 
+  background: rgba(255,255,255,0.95);
+  border: 1px solid rgba(255,255,255,0.3);
+  border-radius: 4px;
+  color: #1e293b;
+}
+input:focus {
+  outline: none;
+  border-color: #60a5fa;
+  box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.3);
+}
+.controls { 
+  max-width: 600px; 
+  margin: 0 auto 1.5rem auto; 
+  background: rgba(255,255,255,0.1);
+  padding: 1.5rem;
+  border-radius: 8px;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.2);
+}
+.buttons { margin-top: .5rem; display: flex; gap: .5rem; }
+button { 
+  padding: .5rem .75rem; 
+  background: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+button:hover {
+  background: #2563eb;
+}
+button:active {
+  background: #1d4ed8;
+}
+table { 
+  width: 100%; 
+  border-collapse: collapse; 
+  margin-top: .5rem; 
+  background: rgba(255,255,255,0.1);
+  border-radius: 8px;
+  overflow: hidden;
+  backdrop-filter: blur(10px);
+}
+thead th { 
+  text-align: left; 
+  border-bottom: 2px solid rgba(255,255,255,0.3); 
+  padding: .8rem .4rem;
+  background: rgba(255,255,255,0.1);
+  color: #ffffff;
+  font-weight: 600;
+}
+tbody td { 
+  border-bottom: 1px solid rgba(255,255,255,0.2); 
+  padding: .4rem .2rem; 
+  color: #e2e8f0;
+}
+tbody tr:hover { 
+  background: rgba(255,255,255,0.15); 
+}
+td:last-child { text-align: right; white-space: nowrap; }
+footer { 
+  margin-top: 2rem; 
+  color: #94a3b8; 
+}
+h2 {
+  color: #ffffff;
+  margin-bottom: 1rem;
+}
+.toolbar {
+  margin-bottom: 1rem;
+}
