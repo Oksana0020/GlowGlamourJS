@@ -34,7 +34,14 @@
       </label>
       <label>
         Rating (0–5)
-        <input name="rating" type="number" step="0.1" min="0" max="5" required />
+        <select name="rating" required>
+          <option value="">Select rating...</option>
+          <option value="1">1 - Poor</option>
+          <option value="2">2 - Fair</option>
+          <option value="3">3 - Good</option>
+          <option value="4">4 - Very Good</option>
+          <option value="5">5 - Excellent</option>
+        </select>
       </label>
       <div class="buttons">
         <button type="submit" id="save-btn">Save</button>
@@ -43,8 +50,18 @@
     </form>
   </section>
 
+  <section class="search-section">
+    <h2>Search Products</h2>
+    <div class="search-controls">
+      <input type="text" id="search-input" placeholder="Enter product name to search..." />
+      <button type="button" id="search-btn">Search</button>
+    </div>
+    <div id="search-results"></div>
+  </section>
+
   <section>
     <h2>Products</h2>
+    <p style="color: #cbd5e1; font-size: 0.9rem; margin-bottom: 1rem;">Showing up to 30 products in alphabetical order. Use search above to find particular product that you are looking for.</p>
     <div class="toolbar">
       <button id="reload-btn">Reload</button>
     </div>
