@@ -35,9 +35,17 @@
 
   function setStatus(text) { $status.textContent = text; }
 
-  // CRUD helpers
   async function listProducts(limit = 30) {
     try {
+      const cacheKey = 'products_list';
+      const cachedProducts = await cache.get(cacheKey);
+      
+      if (cachedProducts) {
+        console.log('Redis Cache HIT: Loaded', cachedProducts.length, 'products from cache');
+        return cachedProducts;
+      }
+
+      console.log('Redis Cache MISS: Loading products from database...');
       const res = await localDB.allDocs({ 
         include_docs: true,
         limit: 200  
@@ -52,7 +60,14 @@
         .sort((a, b) => (a.brand || '').localeCompare(b.brand || ''))
         .slice(0, limit);
       
-      console.log('Returning', validProducts.length, 'valid products');
+      const cacheSuccess = await cache.set(cacheKey, validProducts, 300);
+      
+      if (cacheSuccess) {
+        console.log('Redis SET: Cached', validProducts.length, 'products for 5 minutes');
+      } else {
+        console.log('Redis SET failed, but continuing with database results');
+      }
+      
       return validProducts;
     } catch (error) {
       console.error('Error in listProducts:', error);
@@ -83,6 +98,16 @@
       
       const res = await localDB.put(doc);
       console.log('PouchDB put result:', res);
+      
+      const deletedProducts = await cache.delete('products_list');
+      const deletedSearches = await cache.deleteByPrefix('search_');
+      
+      if (deletedProducts && deletedSearches) {
+        console.log('Redis DEL: Cache cleared after update');
+      } else {
+        console.log('Redis DEL: Partial cache clear (some operations failed)');
+      }
+      
       return res;
     } catch (e) {
       console.error('Error in createOrUpdate:', e);
@@ -90,7 +115,18 @@
         console.log('Resolving conflict...');
         const current = await localDB.get(doc._id);
         doc._rev = current._rev;
-        return localDB.put(doc);
+        const result = await localDB.put(doc);
+
+        const deletedProducts = await cache.delete('products_list');
+        const deletedSearches = await cache.deleteByPrefix('search_');
+        
+        if (deletedProducts && deletedSearches) {
+          console.log('Redis DEL: Cache cleared after conflict resolution');
+        } else {
+          console.log('Redis DEL: Partial cache clear after conflict resolution');
+        }
+        
+        return result;
       }
       throw e;
     }
@@ -167,7 +203,6 @@
     return String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
   }
 
-  // Search functionality
   async function searchProducts(searchTerm) {
     if (!searchTerm.trim()) {
       $searchResults.innerHTML = '<div class="search-no-results">Please enter a product name to search.</div>';
@@ -175,8 +210,16 @@
     }
 
     try {
-      const searches = [];
+      const cacheKey = `search_${searchTerm.toLowerCase()}`;
+      const cachedResults = await cache.get(cacheKey);
       
+      if (cachedResults) {
+        console.log('Redis Cache HIT: Loaded search results from cache');
+        displaySearchResults(cachedResults, searchTerm);
+        return;
+      }
+
+      console.log('Redis Cache MISS: Searching database');
       const existingRes = await localDB.allDocs({ 
         include_docs: true,
         limit: 500
@@ -200,6 +243,14 @@
         })
         // Remove duplicates by ID
         .filter((doc, index, array) => array.findIndex(d => d._id === doc._id) === index);
+
+      const cacheSuccess = await cache.set(cacheKey, products, 120);
+      
+      if (cacheSuccess) {
+        console.log('Redis SET: Cached search results for 2 minutes');
+      } else {
+        console.log('Redis SET failed for search results, but continuing');
+      }
 
       displaySearchResults(products, searchTerm);
     } catch (error) {
@@ -316,11 +367,101 @@
     }
   });
 
+  // Redis cache management
+  const $clearCacheBtn = document.getElementById('clear-cache-btn');
+  const $pingRedisBtn = document.getElementById('ping-redis-btn');
+  const $statsRedisBtn = document.getElementById('stats-redis-btn');
+  const $cacheStatus = document.getElementById('cache-status');
+
+  if ($clearCacheBtn) {
+    $clearCacheBtn.addEventListener('click', async () => {
+      try {
+        await cache.clear();
+        console.log('Redis FLUSHDB: All cache cleared');
+        $cacheStatus.textContent = 'Redis cache cleared!';
+        setTimeout(async () => {
+          $cacheStatus.textContent = cache.getStatus();
+        }, 2000);
+        await render();
+      } catch (error) {
+        console.error('Error clearing Redis cache:', error);
+        $cacheStatus.textContent = 'Error clearing cache';
+      }
+    });
+  }
+
+  if ($pingRedisBtn) {
+    $pingRedisBtn.addEventListener('click', async () => {
+      try {
+        const result = await cache.ping();
+        console.log('Redis PING result:', result);
+        $cacheStatus.textContent = `Redis PING: ${result}`;
+        setTimeout(async () => {
+          $cacheStatus.textContent = cache.getStatus();
+        }, 3000);
+      } catch (error) {
+        console.error('Error pinging Redis:', error);
+        $cacheStatus.textContent = 'Redis connection failed';
+      }
+    });
+  }
+
+  if ($statsRedisBtn) {
+    $statsRedisBtn.addEventListener('click', async () => {
+      try {
+        const stats = await cache.getStats();
+        console.log('Redis Cache Stats:', stats);
+        
+        if (stats.error) {
+          $cacheStatus.textContent = `Stats Error: ${stats.error}`;
+        } else {
+          const statsText = `${stats.backend} | ${stats.cachedItems || 'N/A'} cached items`;
+          $cacheStatus.textContent = ` ${statsText}`;
+          
+          console.table(stats);
+        }
+        
+        setTimeout(async () => {
+          $cacheStatus.textContent = cache.getStatus();
+        }, 4000);
+      } catch (error) {
+        console.error('Error getting Redis stats:', error);
+        $cacheStatus.textContent = 'Stats retrieval failed ';
+      }
+    });
+  }
+
+  // initialize Redis status
+  setTimeout(async () => {
+    try {
+      await cache.ready;
+      
+      const status = cache.getStatus();
+      $cacheStatus.textContent = status;
+      
+      const pingResult = await cache.ping();
+      const stats = await cache.getStats();
+      
+      console.log('Redis integration initialized successfully');
+      console.log('Redis Stats:', stats);
+      console.log('Redis PING:', pingResult);
+      
+      if (stats && !stats.error) {
+        const itemCount = stats.cachedItems || 0;
+        $cacheStatus.textContent = `${status} | ${itemCount} cached items`;
+      }
+      
+    } catch (error) {
+      console.error('Redis initialization error:', error);
+      $cacheStatus.textContent = 'Redis initialization failed ';
+    }
+  }, 1000);
+
   localDB.changes({ live: true, include_docs: true })
     .on('change', () => render())
     .on('error', console.error);
 
   resetForm();
-  render(); 
+  render();
 
 })();

@@ -1,0 +1,27 @@
+{
+  "name": "glow-glamour",
+  "version": "1.0.0",
+  "description": "Cosmetics product management",
+  "main": "app.js",
+  "scripts": {
+    "start": "npx http-server . -p 8000 --cors -c-1",
+    "dev": "npx http-server . -p 8000 --cors -c-1",
+    "redis-install": "npm install redis",
+    "redis-start": "redis-server",
+    "test-redis": "node -e \"const redis = require('redis'); const client = redis.createClient(); client.connect().then(() => console.log('Redis connected')).catch(err => console.log('Redis not available:', err.message));\""
+  },
+  "keywords": [
+    "cosmetics",
+    "pouchdb",
+    "redis",
+    "cache"
+  ],
+  "author": "GLOW GLAMOUR",
+  "license": "MIT",
+  "devDependencies": {
+    "http-server": "^14.1.1"
+  },
+  "optionalDependencies": {
+    "redis": "^4.7.1"
+  }
+}

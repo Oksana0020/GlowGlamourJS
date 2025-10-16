@@ -6,6 +6,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <link rel="stylesheet" href="styles.css" />
   <script src="https://cdn.jsdelivr.net/npm/pouchdb@8.0.1/dist/pouchdb.min.js"></script>
+  <script src="redis-client.js"></script>
 </head>
 <body>
   <header>
@@ -78,6 +79,21 @@
       </thead>
       <tbody id="products-body"></tbody>
     </table>
+  </section>
+
+  <!-- Redis Status -->
+  <section class="cache-section">
+    <h3>Redis Cache Status</h3>
+    <div class="cache-info">
+      <div class="cache-status-info">
+        <span id="cache-status">Initializing Redis</span>
+      </div>
+      <div class="cache-controls">
+        <button id="clear-cache-btn" type="button">Clear Cache</button>
+        <button id="ping-redis-btn" type="button">Test Connection</button>
+        <button id="stats-redis-btn" type="button">Cache Statistics</button>
+      </div>
+    </div>
   </section>
 
   <footer>
